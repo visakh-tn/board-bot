@@ -233,3 +233,6 @@ while(True):
         show_board()
 print("GAME OVER")
 print(F"TITAN MOVES = {titan_moves},  NIMBUS {nimbus_moves}")
+
+#to check if the changes are reflecting on the local repo or the remote repo
+# this part will be appended at remote repo
