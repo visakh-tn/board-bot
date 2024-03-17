@@ -11,11 +11,33 @@ venus_moves=0
 phantom_moves=0
 
 venus_dig_ability=False
+phantom_portal_ability=False
 
 won_players=[]
 
 dig_pos=[]
 in_ditch=[]
+phantom_trap=[]
+in_p_trap=[]
+
+def get_portal_end(pos):
+    if pos <20:
+        prob=random.randint(-15,10)
+        return prob
+    elif pos < 50:
+        prob = random.randint(-20,10)
+        return prob
+    elif pos < 75:
+        prob = random.randint(-25,15)
+        return prob
+    elif pos < 90:        
+        prob = random.randint(-5,95-pos)
+        return prob
+    else:
+        prob=random.randint(-5,99-pos)
+        return prob
+
+
 
 def check_ditch(pos):
     if pos in dig_pos:
@@ -53,6 +75,14 @@ def show_board():
                 board[dps - 1]+='D'
             else:
                 board[dps - 1] = 'D'
+
+    if len(phantom_trap) != 0:
+        for pps in phantom_trap:
+            if isinstance(board[pps - 1],str):
+                board[pps - 1]+='Q'
+            else:
+                board[pps - 1]='Q'
+
     for i in range(len(board)):
         print(board[i]," ",end="")
         if i>0 and (i+1) % 10==0:
@@ -106,6 +136,10 @@ while(True):
             in_ditch.append('T')
             print("Fell in ditch. You will lose next Rolling")
 
+        if titan_pos in phantom_trap:
+            titan_pos+=get_portal_end(titan_pos)
+            print("you fell in portal and teleported to ",titan_pos)
+
         titan_moves+=1
         next_player = 'N'
         print(titan_pos)
@@ -145,6 +179,10 @@ while(True):
         if check_ditch(nimbus_pos):         # ------- CHECKING IF FALLING IN DITCH AND ADDING CHARACTER TO DITCH
             in_ditch.append('N')
             print("Fell in ditch. You will lose next Rolling")
+
+        if nimbus_pos in phantom_trap:      #----- CHECKING IF FELL IN PORTAL ------
+            nimbus_pos+=get_portal_end(nimbus_pos)
+            print("you fell in portal and teleported to ",nimbus_pos)
 
         nimbus_moves+=1
         next_player = 'V'
@@ -186,6 +224,11 @@ while(True):
             else:
                 pass
         venus_pos += venus_roll
+
+        if venus_pos in phantom_trap:       #---- CHECKING IF VENUS FELL IN PORTAL-----------
+            venus_pos+=get_portal_end(venus_pos)
+            print("you fell in portal and teleported to ",venus_pos)
+
         venus_moves+=1
         next_player = 'P'
         print(venus_pos)
@@ -204,6 +247,9 @@ while(True):
             next_player='T'
             dig_pos.remove(phantom_pos)
             continue
+
+        if phantom_moves >10 and phantom_moves%10==0:   #--- CHECKING IF PHANTOM CAN MAKE TRAP PORTAL
+            phantom_portal_ability=True
 
         phantom_roll = roll_dice()
         if phantom_pos + phantom_roll == 100:
@@ -226,6 +272,13 @@ while(True):
         if check_ditch(phantom_pos):        # ------- CHECKING IF FALLING IN DITCH AND ADDING CHARACTER TO DITCH
             in_ditch.append('P')
             print("Fell in ditch. You will lose next Rolling")
+        else:
+            if phantom_portal_ability:
+                p_trap=input("you have unlocked TRAP PORTAL. Do you want to plant it here? (y/n)")
+                if p_trap == 'y':
+                    phantom_trap.append(phantom_pos)
+                    phantom_portal_ability=False
+
 
         phantom_moves+=1
         next_player = 'T'
@@ -233,6 +286,3 @@ while(True):
         show_board()
 print("GAME OVER")
 print(F"TITAN MOVES = {titan_moves},  NIMBUS {nimbus_moves}")
-
-#to check if the changes are reflecting on the local repo or the remote repo
-# this part will be appended at remote repo
