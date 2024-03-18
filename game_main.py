@@ -12,6 +12,7 @@ phantom_moves=0
 
 venus_dig_ability=False
 phantom_portal_ability=False
+phantom_teleport=False
 
 won_players=[]
 
@@ -248,8 +249,12 @@ while(True):
             dig_pos.remove(phantom_pos)
             continue
 
-        if phantom_moves >10 and phantom_moves%10==0:   #--- CHECKING IF PHANTOM CAN MAKE TRAP PORTAL
-            phantom_portal_ability=True
+        if phantom_moves >10 :   #--- CHECKING IF PHANTOM CAN MAKE TRAP PORTAL
+            if  phantom_moves%5==0:
+                phantom_portal_ability=True
+            if phantom_moves % 11 == 0:
+                phantom_teleport = True
+
 
         phantom_roll = roll_dice()
         if phantom_pos + phantom_roll == 100:
@@ -272,12 +277,22 @@ while(True):
         if check_ditch(phantom_pos):        # ------- CHECKING IF FALLING IN DITCH AND ADDING CHARACTER TO DITCH
             in_ditch.append('P')
             print("Fell in ditch. You will lose next Rolling")
-        else:
-            if phantom_portal_ability:
+        elif phantom_portal_ability:
                 p_trap=input("you have unlocked TRAP PORTAL. Do you want to plant it here? (y/n)")
                 if p_trap == 'y':
                     phantom_trap.append(phantom_pos)
                     phantom_portal_ability=False
+        elif phantom_teleport:
+            teleport_champ = input("You have enabled teleport, near which champion do u wish to teleport? (T,N,V,P)")
+            if teleport_champ == "t" or teleport_champ == 'T':
+                phantom_pos = titan_pos - 1
+            elif teleport_champ == 'n' or teleport_champ == 'N':
+                phantom_pos = nimbus_pos -1
+            elif teleport_champ == 'v' or teleport_champ == 'V':
+                phantom_pos == venus_pos -1
+            else :
+                phantom_pos == max(titan_pos, nimbus_pos,venus_pos)-1
+            phantom_teleport = False
 
 
         phantom_moves+=1
