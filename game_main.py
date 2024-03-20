@@ -38,7 +38,39 @@ def get_portal_end(pos):
         prob=random.randint(-5,99-pos)
         return prob
 
+def nimbus_tackle(pos):
+    #TODO3 : As of now doing with move number, later have to add EXP of each champion for attack and defense intensity
+    print("tackle tackling tackle TACKLE")
+    if pos < 6:
+        return 0
+    if nimbus_moves < 5:
+        prob= random.randint(0,1)
+        if prob<0.5:
+            return random.randint(-5,-1)
+        else:
+            return random.randint(1,5)
+    if nimbus_moves < 10:
+        prob=random.randint(0,1)
+        if prob < 0.7:
+            return random.randint(-3,-1)
+        else: 
+            return random.randint(1,2)
+    else: 
+        prob=random.randint(0,1)
+        if prob <0.8:
+            return random.randint(-3,-1)
+        else:
+            return random.randint(1,2)
 
+def check_champ_clash(attacker_pos):
+    if attacker_pos == titan_pos:
+        return 'T'
+    if attacker_pos == venus_pos:
+        return 'V'
+    if attacker_pos == phantom_pos:
+        return 'P'
+    else:
+        return None
 
 def check_ditch(pos):
     if pos in dig_pos:
@@ -140,6 +172,8 @@ while(True):
         if titan_pos in phantom_trap:
             titan_pos+=get_portal_end(titan_pos)
             print("you fell in portal and teleported to ",titan_pos)
+        
+        #TODO2 : Add a function for titan throw based on moves or EXP for throw intensity
 
         titan_moves+=1
         next_player = 'N'
@@ -184,6 +218,20 @@ while(True):
         if nimbus_pos in phantom_trap:      #----- CHECKING IF FELL IN PORTAL ------
             nimbus_pos+=get_portal_end(nimbus_pos)
             print("you fell in portal and teleported to ",nimbus_pos)
+        #TODO1 : check if there is any champion in the new nimbus_pos and then call tackle function, it should change tackled champion's pos
+        
+        tackle_champ =check_champ_clash(nimbus_pos)
+        if tackle_champ == 'T':
+            print("tackling T at ",nimbus_pos)
+            titan_pos+=nimbus_tackle(nimbus_pos)
+        if tackle_champ == 'V':
+            print("tackling V at ",nimbus_pos)
+            venus_pos += nimbus_tackle(nimbus_pos)
+        if tackle_champ == 'P':
+            print("tackling P at ",nimbus_pos)
+            phantom_pos += nimbus_tackle(nimbus_pos)
+        
+
 
         nimbus_moves+=1
         next_player = 'V'
