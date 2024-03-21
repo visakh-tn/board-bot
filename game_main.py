@@ -40,37 +40,120 @@ def get_portal_end(pos):
 
 def nimbus_tackle(pos):
     #TODO3 : As of now doing with move number, later have to add EXP of each champion for attack and defense intensity
-    print("tackle tackling tackle TACKLE")
     if pos < 6:
         return 0
     if nimbus_moves < 5:
-        prob= random.randint(0,1)
-        if prob<0.5:
+        prob= random.randint(0,100)
+        if prob<50:
             return random.randint(-5,-1)
         else:
             return random.randint(1,5)
     if nimbus_moves < 10:
-        prob=random.randint(0,1)
-        if prob < 0.7:
+        prob=random.randint(0,100)
+        if prob < 70:
             return random.randint(-3,-1)
         else: 
             return random.randint(1,2)
     else: 
-        prob=random.randint(0,1)
-        if prob <0.8:
+        prob=random.randint(0,100)
+        if prob <80:
             return random.randint(-3,-1)
         else:
             return random.randint(1,2)
 
-def check_champ_clash(attacker_pos):
-    if attacker_pos == titan_pos:
+def check_champ_clash(attacker_pos,ignore_champ):
+    if attacker_pos == titan_pos and ignore_champ != 'T':
         return 'T'
-    if attacker_pos == venus_pos:
+    if attacker_pos == nimbus_pos and ignore_champ != 'N':
+        return 'N'
+    if attacker_pos == venus_pos and ignore_champ != 'V':
         return 'V'
-    if attacker_pos == phantom_pos:
+    if attacker_pos == phantom_pos and ignore_champ != 'P':
         return 'P'
     else:
         return None
+
+def direction_dice(precision=0):
+    if precision == 0:
+        return random.randint(1,4)
+    else:
+        probability = random.randint(0,100)
+        if precision == 25:
+            if probability <=50:
+                return 3
+            if probability <= 65:
+                return 1
+            if probability <= 80:
+                return 4
+            else:
+                return 2
+        if precision == 50:
+            if probability <=50:
+                return 3
+            if probability <= 75:
+                return 2
+            if probability <= 87:
+                return 4
+            else:
+                return 1
+        if precision == 75:
+            if probability <=50:
+                return 3
+            if probability <= 84:
+                return 2
+            if probability <= 92:
+                return 4
+            else:
+                return 1
+
+def titan_throw(pos):
+    if pos<10:
+        if titan_moves < 5 :
+            dir = random.choice([-1,1])         #-1 is for 3 or for negetive dir and +1
+            return random.choice([1,2,3]) * dir
+        else:
+            return 
+    elif pos < 25:
+        dir = direction_dice(75)
+        if dir == 1:
+            return random.randint(10,15)
+        if dir == 2:
+            return random.randint(-15,-10)      
+        if dir == 3:
+            return random.randint(-5,-1) 
+        if dir == 4:
+            return random.randint(1,5)
+    elif pos < 50:
+        dir = direction_dice(50)
+        if dir == 1:
+            return random.randint(10,25)
+        if dir == 2:
+            return random.randint(-25,-10)      
+        if dir == 3:
+            return random.randint(-8,-1) 
+        if dir == 4:
+            return random.randint(1,8)
+        
+    else:
+        dir = direction_dice(75)
+        if dir == 1:
+            distance = random.randint(8,12)
+            if pos+distance >= 100:
+                return random.randint(1,100-pos)
+            else:
+                return random.randint(8,12)
+        if dir == 2:
+            return random.randint(-12,-8)      
+        if dir == 3:
+            return random.randint(-3,-1) 
+        if dir == 4:
+            distance = random.randint(1,3)
+            if pos+distance >= 100:
+                return random.randint(1,100-pos)
+            else:
+                return random.randint(1,3)
+
+
 
 def check_ditch(pos):
     if pos in dig_pos:
@@ -143,7 +226,8 @@ while(True):
             continue
         if 'T' in in_ditch:         # ----- CHECKNG IF IN DITCH AND SKIPPING THE DICE ROLL 
             in_ditch.remove('T')
-            dig_pos.remove(titan_pos)
+            if titan_pos in dig_pos: 
+                dig_pos.remove(titan_pos)
             next_player='N'
             continue
         titan_roll = roll_dice()
@@ -174,6 +258,19 @@ while(True):
             print("you fell in portal and teleported to ",titan_pos)
         
         #TODO2 : Add a function for titan throw based on moves or EXP for throw intensity
+        throw_champ = check_champ_clash(titan_pos,'T')
+        if throw_champ == 'N':
+            print("throwing  N at ",nimbus_pos)
+            nimbus_pos+=titan_throw(titan_pos)
+
+        if throw_champ == 'V':
+            print("throwing V at ",venus_pos)
+            venus_pos+=titan_throw(titan_pos)
+
+        if throw_champ == 'P':
+            print("throwing P at ",phantom_pos)
+            phantom_pos += titan_throw(titan_pos)
+
 
         titan_moves+=1
         next_player = 'N'
@@ -189,7 +286,8 @@ while(True):
             continue
         if 'N' in in_ditch:             # -------- CHECKNG IF IN DITCH AND SKIPPING THE DICE ROLL 
             in_ditch.remove('N')
-            dig_pos.remove(nimbus_pos)
+            if nimbus_pos in dig_pos: 
+                dig_pos.remove(nimbus_pos)
             next_player='V'
             continue
 
@@ -220,7 +318,7 @@ while(True):
             print("you fell in portal and teleported to ",nimbus_pos)
         #TODO1 : check if there is any champion in the new nimbus_pos and then call tackle function, it should change tackled champion's pos
         
-        tackle_champ =check_champ_clash(nimbus_pos)
+        tackle_champ =check_champ_clash(nimbus_pos,'N')
         if tackle_champ == 'T':
             print("tackling T at ",nimbus_pos)
             titan_pos+=nimbus_tackle(nimbus_pos)
@@ -294,7 +392,8 @@ while(True):
         if 'P' in in_ditch:       # ----- CHECKNG IF IN DITCH AND SKIPPING THE DICE ROLL 
             in_ditch.remove('P')
             next_player='T'
-            dig_pos.remove(phantom_pos)
+            if phantom_pos in dig_pos: 
+                dig_pos.remove(phantom_pos)
             continue
 
         if phantom_moves >10 :   #--- CHECKING IF PHANTOM CAN MAKE TRAP PORTAL
