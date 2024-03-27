@@ -10,9 +10,12 @@ nimbus_moves=0
 venus_moves=0
 phantom_moves=0
 
+# -- ABIITIES --
 venus_dig_ability=False
 phantom_portal_ability=False
-phantom_teleport=False
+phantom_teleport_ability=False
+nimbus_sprint_ability=False
+nimbus_sprint_rolls=0
 
 won_players=[]
 
@@ -39,7 +42,7 @@ def get_portal_end(pos):
         return prob
 
 def nimbus_tackle(pos):
-    #TODO3 : As of now doing with move number, later have to add EXP of each champion for attack and defense intensity
+    #TODO4 : As of now doing with move number, later have to add EXP of each champion for attack and defense intensity
     if pos < 6:
         return 0
     if nimbus_moves < 5:
@@ -112,7 +115,7 @@ def titan_throw(pos):
             dir = random.choice([-1,1])         #-1 is for 3 or for negetive dir and +1
             return random.choice([1,2,3]) * dir
         else:
-            return 
+            return  random.choice([1,2,3]) * -1
     elif pos < 25:
         dir = direction_dice(75)
         if dir == 1:
@@ -141,7 +144,7 @@ def titan_throw(pos):
             if pos+distance >= 100:
                 return random.randint(1,100-pos)
             else:
-                return random.randint(8,12)
+                return distance
         if dir == 2:
             return random.randint(-12,-8)      
         if dir == 3:
@@ -151,8 +154,36 @@ def titan_throw(pos):
             if pos+distance >= 100:
                 return random.randint(1,100-pos)
             else:
-                return random.randint(1,3)
+                return distance
 
+def venus_throw(pos):
+    if pos<13:
+        if titan_moves < 5 :
+            dir = random.choice([-1,1])         #-1 is for 3 or for negetive dir and +1 for 4 or for +ve
+            return random.choice([1,2,3]) * dir
+        else:
+            return  random.choice([1,2,3]) * -1
+    else:
+        dir = direction_dice(0)
+        if dir == 1:
+            distance = random.randint(8,12)
+            if pos+distance >= 100:
+                return random.randint(1,100-pos)
+            else:
+                return distance
+            
+        if dir == 2:
+            return random.randint(-12,-8)
+        
+        if dir == 3:
+            return random.randint(-3,-1)
+        
+        if dir == 4:
+            distance = random.randint(1,3)
+            if pos+distance >= 100:
+                return random.randint(1,100-pos)
+            else:
+                return distance
 
 
 def check_ditch(pos):
@@ -257,7 +288,7 @@ while(True):
             titan_pos+=get_portal_end(titan_pos)
             print("you fell in portal and teleported to ",titan_pos)
         
-        #TODO2 : Add a function for titan throw based on moves or EXP for throw intensity
+        #TODO2 ✅ : Add a function for titan throw based on moves or EXP for throw intensity
         throw_champ = check_champ_clash(titan_pos,'T')
         if throw_champ == 'N':
             print("throwing  N at ",nimbus_pos)
@@ -291,6 +322,10 @@ while(True):
             next_player='V'
             continue
 
+        if nimbus_moves >=10 and nimbus_moves%5 and nimbus_sprint_rolls==False:     # checking if nimbus' sprint mode is ON
+            nimbus_sprint_ability=True
+            nimbus_sprint_rolls=4
+
         nimbus_roll = roll_dice()
         if nimbus_pos + nimbus_roll == 100:
             nimbus_pos += nimbus_roll
@@ -307,6 +342,17 @@ while(True):
             print(nimbus_pos)
             show_board()
             continue
+        #TODO3 : check nimbus's SPRINT ability and increase speed on each dice roll
+        if nimbus_sprint_ability == True:
+            print(" nimbus sprinting SPRINT ON ")
+            if nimbus_roll == 6:
+                nimbus_sprint_rolls = nimbus_sprint_rolls - 2
+            else:
+                nimbus_sprint_rolls = nimbus_sprint_rolls - 1
+            if nimbus_sprint_rolls <= 0:
+                nimbus_sprint_ability = False
+            nimbus_roll=nimbus_roll+ int(nimbus_roll*0.5)
+
         nimbus_pos += nimbus_roll
 
         if check_ditch(nimbus_pos):         # ------- CHECKING IF FALLING IN DITCH AND ADDING CHARACTER TO DITCH
@@ -316,7 +362,7 @@ while(True):
         if nimbus_pos in phantom_trap:      #----- CHECKING IF FELL IN PORTAL ------
             nimbus_pos+=get_portal_end(nimbus_pos)
             print("you fell in portal and teleported to ",nimbus_pos)
-        #TODO1 : check if there is any champion in the new nimbus_pos and then call tackle function, it should change tackled champion's pos
+        #TODO1 ✅ : check if there is any champion in the new nimbus_pos and then call tackle function, it should change tackled champion's pos
         
         tackle_champ =check_champ_clash(nimbus_pos,'N')
         if tackle_champ == 'T':
@@ -375,6 +421,19 @@ while(True):
         if venus_pos in phantom_trap:       #---- CHECKING IF VENUS FELL IN PORTAL-----------
             venus_pos+=get_portal_end(venus_pos)
             print("you fell in portal and teleported to ",venus_pos)
+        
+        throw_champ = check_champ_clash(venus_pos,'V')      # venus throw same as titans but precision is 0
+        if throw_champ == 'N':
+            print("throwing  N at ",nimbus_pos)
+            nimbus_pos+=venus_throw(venus_pos)
+
+        if throw_champ == 'T':
+            print("throwing T at ",venus_pos)
+            titan_pos+=venus_throw(venus_pos)
+
+        if throw_champ == 'P':
+            print("throwing P at ",phantom_pos)
+            phantom_pos += venus_throw(venus_pos)
 
         venus_moves+=1
         next_player = 'P'
@@ -400,7 +459,7 @@ while(True):
             if  phantom_moves%5==0:
                 phantom_portal_ability=True
             if phantom_moves % 11 == 0:
-                phantom_teleport = True
+                phantom_teleport_ability = True
 
 
         phantom_roll = roll_dice()
@@ -429,7 +488,7 @@ while(True):
                 if p_trap == 'y':
                     phantom_trap.append(phantom_pos)
                     phantom_portal_ability=False
-        elif phantom_teleport:
+        elif phantom_teleport_ability:
             teleport_champ = input("You have enabled teleport, near which champion do u wish to teleport? (T,N,V,P)")
             if teleport_champ == "t" or teleport_champ == 'T':
                 phantom_pos = titan_pos - 1
@@ -439,7 +498,7 @@ while(True):
                 phantom_pos == venus_pos -1
             else :
                 phantom_pos == max(titan_pos, nimbus_pos,venus_pos)-1
-            phantom_teleport = False
+            phantom_teleport_ability = False
 
 
         phantom_moves+=1
