@@ -1,5 +1,5 @@
 import random
-
+# TODO 9: HAVE TO GIVE OPTION TO USER TO SELECT THEIR CHAMPION IN THE FINAL VERSION
 titan_pos=0
 nimbus_pos=0
 venus_pos=0
@@ -17,12 +17,47 @@ phantom_teleport_ability=False
 nimbus_sprint_ability=False
 nimbus_sprint_rolls=0
 
+venus_shield_on=False
+venus_shield_strength=100
+
 won_players=[]
 
 dig_pos=[]
 in_ditch=[]
 phantom_trap=[]
 in_p_trap=[]
+
+#TODO 5 : Add venus shield function to return shield health on class
+#FIXME 🕰️SHIELD WORKING
+def shield_clash(attacker="T"):
+    prob=random.randint(1,100)
+    if attacker == "t" or attacker == "T":
+        if prob<20:
+            return random.randint(5,50)
+        else:
+            return random.randint(50,105)
+    else:
+        if prob <50:
+            return random.randint(1,30)
+        else:
+            return random.randint(30,70)
+
+
+#TODO 4✔️ : Add nimbus agility check
+#FIXME ADDED
+def nimbus_agility_caught(pos=0,attacker='T'):  #pos is not used now, actually EXP of nimbus is to be used to find the probabilty of getting caught
+    prob=random.randint(1,5)
+    if attacker == "t" or attacker == "T":
+        if prob%2==0:       # As of now titan is underpowered so titan gets better odds of catching nimbus
+            return False
+        else:
+            return True
+    else:
+        if prob%2==0:       # Venus gets lower odds of catching because venus has more abilities for game advantage
+            return True
+        else:
+            return False
+
 
 def get_portal_end(pos):
     if pos <20:
@@ -42,7 +77,7 @@ def get_portal_end(pos):
         return prob
 
 def nimbus_tackle(pos):
-    #TODO4 : As of now doing with move number, later have to add EXP of each champion for attack and defense intensity
+    #TODO10 : As of now doing with move number, later have to add EXP of each champion for attack and defense intensity
     if pos < 6:
         return 0
     if nimbus_moves < 5:
@@ -291,12 +326,29 @@ while(True):
         #TODO2 ✅ : Add a function for titan throw based on moves or EXP for throw intensity
         throw_champ = check_champ_clash(titan_pos,'T')
         if throw_champ == 'N':
-            print("throwing  N at ",nimbus_pos)
-            nimbus_pos+=titan_throw(titan_pos)
+            # TODO 4✔️ : CHECK NIMBUS IF NIMBUS CAN BE CAUGHT
+            if nimbus_agility_caught(nimbus_pos,"T"):
+                print("throwing  N at ",nimbus_pos)
+                nimbus_pos+=titan_throw(titan_pos)
+            else:
+                print("could not catch nimbus")
+            #FIXME ADDED
 
         if throw_champ == 'V':
-            print("throwing V at ",venus_pos)
-            venus_pos+=titan_throw(titan_pos)
+            #TODO 5 : CHECK IF VENUS SHIELD CAN BE BROKEN (MAKE A GLOBAL VAR FOR SHIELD STRENGTH initial value 100 )
+            #CAUGHT OR NOT SHIELD WILL TAKE DAMAGE AND WILL BE STORED IN GLOBAL VAR FOR SHIELD STRENGTH
+            if venus_shield_on == True:
+                print("titan attacking shield ")
+                impact=shield_clash("T")
+                venus_shield_strength = venus_shield_strength - impact
+                if venus_shield_strength <=0:
+                    print("titan attacking shield ")
+                    venus_shield_on = False
+                    print("throwing V at ",venus_pos)
+                    venus_pos+=titan_throw(titan_pos)
+            else:
+                print("throwing V at ",venus_pos)
+                venus_pos+=titan_throw(titan_pos)
 
         if throw_champ == 'P':
             print("throwing P at ",phantom_pos)
@@ -322,7 +374,7 @@ while(True):
             next_player='V'
             continue
 
-        if nimbus_moves >=10 and nimbus_moves%5 and nimbus_sprint_rolls==False:     # checking if nimbus' sprint mode is ON
+        if nimbus_moves >=10 and nimbus_moves%5 and nimbus_sprint_ability==False:     # checking if nimbus' sprint mode is ON
             nimbus_sprint_ability=True
             nimbus_sprint_rolls=4
 
@@ -342,7 +394,7 @@ while(True):
             print(nimbus_pos)
             show_board()
             continue
-        #TODO3 : check nimbus's SPRINT ability and increase speed on each dice roll
+        #TODO3 ✅ : check nimbus's SPRINT ability and increase speed on each dice roll
         if nimbus_sprint_ability == True:
             print(" nimbus sprinting SPRINT ON ")
             if nimbus_roll == 6:
@@ -351,8 +403,10 @@ while(True):
                 nimbus_sprint_rolls = nimbus_sprint_rolls - 1
             if nimbus_sprint_rolls <= 0:
                 nimbus_sprint_ability = False
-            nimbus_roll=nimbus_roll+ int(nimbus_roll*0.5)
-
+            nimbus_sprint_bonus = int(nimbus_roll*0.5)
+            if nimbus_pos + nimbus_roll + nimbus_sprint_bonus >= 100:
+                nimbus_sprint_bonus=0
+            nimbus_roll=nimbus_roll+ nimbus_sprint_bonus
         nimbus_pos += nimbus_roll
 
         if check_ditch(nimbus_pos):         # ------- CHECKING IF FALLING IN DITCH AND ADDING CHARACTER TO DITCH
@@ -369,8 +423,20 @@ while(True):
             print("tackling T at ",nimbus_pos)
             titan_pos+=nimbus_tackle(nimbus_pos)
         if tackle_champ == 'V':
-            print("tackling V at ",nimbus_pos)
-            venus_pos += nimbus_tackle(nimbus_pos)
+            #TODO 5 : CHECK SHIELD
+            if venus_shield_on == True:
+                print("nimbus attacking shield ")
+                impact=shield_clash("N")
+                venus_shield_strength = venus_shield_strength - impact
+                if venus_shield_strength <=0:
+                    print("nimbus broke shield ")
+                    venus_shield_on = False
+                    print("tackling V at ",nimbus_pos)
+                    venus_pos += nimbus_tackle(nimbus_pos)
+            else:
+                print("tackling V at ",nimbus_pos)
+                venus_pos += nimbus_tackle(nimbus_pos)
+
         if tackle_champ == 'P':
             print("tackling P at ",nimbus_pos)
             phantom_pos += nimbus_tackle(nimbus_pos)
@@ -392,6 +458,11 @@ while(True):
 
         if venus_moves >= 5 and venus_moves%5==0:       #----- CHECKING IF VENUS CAN DIG DITCH
             venus_dig_ability = True
+        
+        if venus_shield_on == False:        # check if shield is already on
+            if venus_moves >= 5 and venus_moves%4 == 0:
+                venus_shield_on=True
+                venus_shield_strength = 100
 
         venus_roll = roll_dice()
         if venus_pos + venus_roll == 100:
@@ -424,8 +495,13 @@ while(True):
         
         throw_champ = check_champ_clash(venus_pos,'V')      # venus throw same as titans but precision is 0
         if throw_champ == 'N':
-            print("throwing  N at ",nimbus_pos)
-            nimbus_pos+=venus_throw(venus_pos)
+            # TODO 4✔️ : CHECK NIMBUS AGILITY
+            if nimbus_agility_caught(nimbus_pos,"T"):
+                print("throwing  N at ",nimbus_pos)
+                nimbus_pos+=titan_throw(titan_pos)
+            else:
+                print("could not catch nimbus")
+            # FIXME : LAST DONE
 
         if throw_champ == 'T':
             print("throwing T at ",venus_pos)
@@ -507,3 +583,6 @@ while(True):
         show_board()
 print("GAME OVER")
 print(F"TITAN MOVES = {titan_moves},  NIMBUS {nimbus_moves}")
+# CHANGES MADE: SPRINTING OPTIMISED COZ EXCEEDING BOARD LIMITS
+#               NIMBUS AGILITY ADDED
+#               ADDED VENUS SHIELD
