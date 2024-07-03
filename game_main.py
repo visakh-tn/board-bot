@@ -27,8 +27,8 @@ in_ditch=[]
 phantom_trap=[]
 in_p_trap=[]
 
-#TODO 5 : Add venus shield function to return shield health on class
-#FIXME 🕰️SHIELD WORKING
+#TODO 5 ✅ : Add venus shield function to return shield health on class
+#FIXME ADDED SHIELD WORKING
 def shield_clash(attacker="T"):
     prob=random.randint(1,100)
     if attacker == "t" or attacker == "T":
@@ -43,7 +43,7 @@ def shield_clash(attacker="T"):
             return random.randint(30,70)
 
 
-#TODO 4✔️ : Add nimbus agility check
+#TODO 4 ✅ : Add nimbus agility check
 #FIXME ADDED
 def nimbus_agility_caught(pos=0,attacker='T'):  #pos is not used now, actually EXP of nimbus is to be used to find the probabilty of getting caught
     prob=random.randint(1,5)
@@ -326,7 +326,7 @@ while(True):
         #TODO2 ✅ : Add a function for titan throw based on moves or EXP for throw intensity
         throw_champ = check_champ_clash(titan_pos,'T')
         if throw_champ == 'N':
-            # TODO 4✔️ : CHECK NIMBUS IF NIMBUS CAN BE CAUGHT
+            # TODO 4 ✅ : CHECK NIMBUS IF NIMBUS CAN BE CAUGHT
             if nimbus_agility_caught(nimbus_pos,"T"):
                 print("throwing  N at ",nimbus_pos)
                 nimbus_pos+=titan_throw(titan_pos)
@@ -335,7 +335,7 @@ while(True):
             #FIXME ADDED
 
         if throw_champ == 'V':
-            #TODO 5 : CHECK IF VENUS SHIELD CAN BE BROKEN (MAKE A GLOBAL VAR FOR SHIELD STRENGTH initial value 100 )
+            #TODO 5 ✅: CHECK IF VENUS SHIELD CAN BE BROKEN (MAKE A GLOBAL VAR FOR SHIELD STRENGTH initial value 100 )
             #CAUGHT OR NOT SHIELD WILL TAKE DAMAGE AND WILL BE STORED IN GLOBAL VAR FOR SHIELD STRENGTH
             if venus_shield_on == True:
                 print("titan attacking shield ")
@@ -423,7 +423,7 @@ while(True):
             print("tackling T at ",nimbus_pos)
             titan_pos+=nimbus_tackle(nimbus_pos)
         if tackle_champ == 'V':
-            #TODO 5 : CHECK SHIELD
+            #TODO 5 ✅ : CHECK SHIELD
             if venus_shield_on == True:
                 print("nimbus attacking shield ")
                 impact=shield_clash("N")
@@ -495,13 +495,13 @@ while(True):
         
         throw_champ = check_champ_clash(venus_pos,'V')      # venus throw same as titans but precision is 0
         if throw_champ == 'N':
-            # TODO 4✔️ : CHECK NIMBUS AGILITY
+            # TODO 4 ✅ : CHECK NIMBUS AGILITY
             if nimbus_agility_caught(nimbus_pos,"T"):
                 print("throwing  N at ",nimbus_pos)
                 nimbus_pos+=titan_throw(titan_pos)
             else:
                 print("could not catch nimbus")
-            # FIXME : LAST DONE
+            # FIXME :  ADDED
 
         if throw_champ == 'T':
             print("throwing T at ",venus_pos)
