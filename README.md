@@ -1,0 +1,3 @@
+A new board game -CHAMPIONS BOARD GAME- which will have multiple characters to represent the players as their champions. Each characters will have different abilities. The players will have to make strategic use of abilities and reach destination.
+initial prototype will run on discord bot. After working on the feedbacks and suggesitons, I intend to make android app for the board game. Along with a tag-team tic-tac-toe from existing bot game.
+Sugesstions are welcome, please consider the fact that the code is still under development. Pull requests with appropriate comments will be merged. Thank you all for contributions.
